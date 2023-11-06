@@ -1,0 +1,15 @@
+---
+# handlers file for prometeus_alert
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+    
+- name: prometheus reload
+  systemd:
+    name: prometheus
+    state: restarted
+
+- name: alertmanager reload
+  systemd:
+    name: alertmanager
+    state: restarted

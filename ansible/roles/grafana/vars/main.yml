@@ -1,0 +1,4 @@
+---
+# vars file for grafana
+grafana_version: 10.2.0
+#grafana_admin_password: "abc1234"

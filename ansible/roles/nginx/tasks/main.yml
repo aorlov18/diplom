@@ -1,0 +1,37 @@
+---
+# tasks file for nginx
+- name: Allow TCP Ports
+  iptables:
+  chain: INPUT
+  rule_num: '1'
+  action: insert
+  protocol: tcp
+  jump: ACCEPT
+  destination_port: '{{ item }}'
+    loop: [ '80', '443' ]
+
+- name: Install Nginx Web Server on Debian Family
+  apt:
+    name=nginx
+    state=latest
+  notify:
+    - nginx systemd
+
+- name: Replace nginx.conf
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  
+- name: Create home directory for www
+  file:
+    path: /var/www/{{ virtual_domain }}
+    state: directory
+
+- name: Add virtual domain in NGINX for Deb
+  vars:
+    fastcgi_pass_path: /run/php/php7.2-fpm.sock
+  template:
+    src: nginx_vhosts.conf
+    dest: /etc/nginx/sites-enabled/{{ virtual_domain }}.conf
+  notify:
+    - nginx restart

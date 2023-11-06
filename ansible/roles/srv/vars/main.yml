@@ -1,0 +1,6 @@
+---
+# vars file for srv
+helm_version: 3.13.1
+
+
+

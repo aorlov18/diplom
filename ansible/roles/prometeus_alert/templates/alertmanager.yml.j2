@@ -1,0 +1,30 @@
+global:
+  smtp_from: monitoring@mail.ru
+
+route:
+  group_by: ['alertname', 'instance', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+    - receiver: alert-bot
+
+receivers:
+  - name: 'alert-bot'
+    telegram_configs:
+    - send_resolved: true
+      api_url: https://api.telegram.org
+      bot_token: ${BOT_TOKEN}
+      chat_id: ${CHAT_ID}
+      parse_mode: HTML
+      http_config:
+        follow_redirects: true
+        enable_http2: false
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

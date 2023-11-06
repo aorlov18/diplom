@@ -1,0 +1,142 @@
+---
+# tasks file for prometeus_alert
+- name: create prometheus user
+  user:
+    name: prometheus
+    append: true
+    shell: /bin/sbin/nologin
+    system: true
+    create_home: false
+
+- name: Create prometheus dir 
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  loop:
+    - '/tmp/prometheus'
+    - '/etc/prometheus'
+    - '/var/lib/prometheus'
+
+- name: download and unzip Prometheus if not exist 
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp/prometheus
+    creates: /tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64
+    remote_src: yes
+    validate_certs: no
+
+- name: Move the binary to the final destination 
+  copy:
+    src: /tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: preserve
+    owner: prometheus
+    group: prometheus
+  loop: [ 'prometheus', 'promtool' ]
+
+- name: Copy the config files to /etc/prometheus
+  copy:
+    src: /tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}
+    dest: /etc/prometheus/
+    remote_src: yes
+    mode: preserve
+    owner: prometheus
+    group: prometheus
+  loop: [ 'console_libraries', 'consoles' ]
+
+- name: Copy the main config file to /etc/prometheus
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+  notify: prometheus reload
+
+- name: copy config files for alert rules to /etc/prometheus
+  copy:
+    src: alert.rules.yml
+    dest: /etc/prometheus/alert.rules.yml
+    owner: prometheus
+    group: prometheus
+  notify: prometheus reload
+
+- name: create unit for systemd
+  copy:
+    src: prometheus.service
+    dest: /etc/systemd/system/
+  notify:
+    - systemd reload
+
+- name: Start service prometheus
+  systemd:
+    name: prometheus
+    state: started
+    enabled: yes
+
+- name: Create Alertmanager user
+  user:
+    name: alertmanager
+    append: true
+    shell: /bin/sbin/nologin
+    system: true
+    create_home: false
+
+- name: Create directories for Alertmanager
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: alertmanager
+    group: alertmanager
+  loop:
+    - '/tmp/alertmanager'
+    - '/etc/alertmanager'
+    - '/var/lib/prometheus/alertmanager'
+
+- name: download and unzip Alertmanager 
+  unarchive:
+    src: https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz
+    dest: /tmp/alertmanager
+    creates: /tmp/alertmanager/alertmanager-{{ alertmanager_version }}.linux-amd64
+    remote_src: yes
+
+- name: Move the binary to the final destination /usr/local/bin
+  copy:
+    src: /tmp/alertmanager/alertmanager-{{ alertmanager_version }}.linux-amd64/{{ item }}
+    dest: /usr/local/bin/
+    remote_src: yes
+    mode: preserve
+    owner: alertmanager
+    group: alertmanager
+  loop: [ 'alertmanager', 'amtool' ]
+
+- name: Copy config files to /etc/alertmanager
+  template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: alertmanager
+    group: alertmanager
+    mode: preserve
+
+
+- name: Create File for Alertmanager Systemd
+  copy:
+    src: alertmanager.service
+    dest: /etc/systemd/system/
+  notify: systemd reload
+
+- name: Systemctl Alertmanager Start
+  systemd:
+    name: alertmanager
+    state: started
+    enabled: yes
+
+- name: clean
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - '/tmp/prometheus/'
+    - '/tmp/alertmanager/'

@@ -1,0 +1,4 @@
+---
+# vars file for blackbox
+blackbox_version: 0.24.0
+site_blackbox_url: http://worker01.skill.local:32204

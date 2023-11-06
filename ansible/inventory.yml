@@ -1,0 +1,35 @@
+---
+kube_servers:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: user
+    ansible_ssh_private_key_file: ../dpl.key
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+  hosts:
+    server01:
+      ansible_host: master.skfact.local
+      ansible_ssh_host: 158.160.105.16
+    server02:
+      ansible_host: worker01.skfact.local
+      ansible_ssh_host: 51.250.66.43
+  
+  children:
+    master:
+      hosts:
+        server01:
+    worker:
+      hosts:
+        server02:
+
+srv_servers:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_private_key_file: ../dpl.key
+    ansible_user: user
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    
+  hosts:
+    server03:
+      ansible_host: srv.skfact.local
+      virtual_domain: domain.dpl.ru
+      ansible_ssh_host: 158.160.114.174

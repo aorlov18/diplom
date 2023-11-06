@@ -1,0 +1,3 @@
+---
+# vars file for kubernetes
+node_exporter_version: "1.6.1"

@@ -1,0 +1,22 @@
+---
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+
+
+
+#- name: bind systemd
+#  systemd:
+#    enebled: yes
+#    state: started
+
+
+#- name: alertmanager reload
+#  systemd:
+#    name: alertmanager
+#    state: restarted
+
+#- name: blackbox reload
+#  systemd:
+#    name: blackbox_exporter
+#    state: restarted

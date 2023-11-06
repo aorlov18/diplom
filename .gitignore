@@ -1,0 +1,10 @@
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/key.json
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/variable.tf
+ansible/roles/prometeus_alert/files/.alert-bot
+.env
+ansible/roles/srv/files/.env
+server01

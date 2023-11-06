@@ -1,0 +1,213 @@
+---
+- name: add our servers to the host file
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {% for host in groups['kube_servers'] %}
+      {{ hostvars[host].ansible_ssh_host }} {{ hostvars[host].ansible_host }}
+      {% endfor %}
+      {% for host in groups['srv_servers'] %}
+      {{ hostvars[host].ansible_ssh_host }} {{ hostvars[host].ansible_host }}
+      {% endfor %}
+
+- name: Set hostname
+  hostname:
+    name: "{{ hostvars[inventory_hostname].ansible_host }}"
+
+- name: Install required system packages
+  apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+      - gnupg
+      - adduser 
+      - libfontconfig1 
+      - musl
+      - git
+    state: latest
+    update_cache: true
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+#- name: Add Docker Repository
+#  apt_repository:
+#    repo: deb https://download.docker.com/linux/ubuntu focal stable
+#    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Repo in the gitlab-runner
+  shell: curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
+
+
+- name: Update apt and install docker and docker-compose
+  apt:
+    pkg:
+      - docker
+      - docker.io
+      - docker-compose
+      - gitlab-runner
+    state: latest
+    update_cache: true
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
+
+- name: Add user to Docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+
+- name: Add the gitlab-runner user to the docker group
+  user:
+    name: gitlab-runner
+    groups: docker
+    append: yes
+
+
+- name: allow authostart service and start them 
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  loop:
+    - docker
+    - gitlab-runner
+
+- name: import GPG-key in the repository for kubernetes
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: add repository kubernetes
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    filename: kubernetes
+
+- name: install kubectl
+  apt:
+    name: kubectl
+    state: present
+    update_cache: yes
+
+- name: download and unzip Helm if not exist 
+  unarchive:
+    src: "https://get.helm.sh/helm-v{{ helm_version }}-linux-amd64.tar.gz"
+    dest: /tmp
+    remote_src: yes
+    creates: /usr/local/bin/helm
+
+- name: install helm
+  shell: test -f /tmp/linux-amd64/helm && (mv /tmp/linux-amd64/helm /usr/local/bin/ && chmod +x /usr/local/bin/helm) || true
+
+
+#- name: Enable service docker, and enable persistently
+#  service: 
+#   name: docker
+#    enabled: yes
+
+- name: Setting up a system variable for the configuration file kubernetes/admin.conf
+  lineinfile:
+    path: /etc/environment
+    line: export KUBECONFIG=/etc/kubernetes/admin.conf
+
+
+- name: Security settings
+  block:
+    - name: Allowing TCP ports using IPTABLES
+      iptables:
+        chain: INPUT
+        rule_num: '1'
+        action: insert
+        protocol: tcp
+        jump: ACCEPT
+        destination_port: "{{ item }}"
+      loop: [ '9090', '9093', '9094', '9100', '9115', '5000', '3000' ]
+
+    - name: Allowing UDP ports using IPTABLES
+      iptables:
+        chain: INPUT
+        rule_num: '1'
+        action: insert
+        protocol: udp
+        jump: ACCEPT
+        destination_port: '9094'
+
+- name: сreate directories for docker repo
+  file: path=$HOME/dockerrepo state=directory
+
+- name: сreate directories for certificate for docker-local-hub
+  file: path=/etc/ssl/docrepo state=directory
+
+- name: self-signed certificate
+  shell: openssl req -new -x509 -days 1461 -nodes -out /etc/ssl/docrepo/public.pem -keyout /etc/ssl/docrepo/private.key -subj "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN=srv.skfact.local"
+
+- name: stop and remove docker registry and container
+  shell: docker container stop registry && docker container rm -v registry
+  ignore_errors: yes
+
+- name: run docker container TSL certificate 
+  shell: docker run -d -p 5000:5000 --restart=always --name registry -v /dockerrepo:/var/lib/registry -v /etc/ssl/docrepo:/certs -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/public.pem -e REGISTRY_HTTP_TLS_KEY=/certs/private.key registry:2
+  ignore_errors: yes
+  
+- name: Docker systemctl enable and start
+  systemd:
+    name: docker
+    enabled: yes
+    state: restarted
+
+- name: сreate directories for set-file kubernetes
+  file: path=/etc/kubernetes state=directory
+
+- name: copy config files for kubernetes
+  copy:
+    src: ../server01/etc/kubernetes/admin.conf
+    dest: /etc/kubernetes/ 
+
+
+
+
+
+#- name: Install utils for bind
+#  apt:
+#    name: "{{ item }}"
+#    state: present
+#  loop:
+ #  - bind9
+ #  - dnsutils
+ # notify:
+ #   - bind systemd
+
+#- prometeus
+#- alertmanager
+#- blackbox
+#- grafana
+
+
+#- name: clean
+#  file:
+#    path: "{{ item }}"
+#    state: absent
+#  loop:
+    #- grafana_{{ grafana_version }}
+#    - '/tmp/alertmanager/'
+#    - '/tmp/prometheus/'
+    #- '/tmp/blackbox_exporter'

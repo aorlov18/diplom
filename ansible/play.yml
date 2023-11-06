@@ -1,0 +1,30 @@
+---
+- hosts: kube_servers
+  become: yes
+  become_user: root
+  become_method: su
+  become_exe: 'sudo su -'
+  gather_facts: true
+  user: root
+
+  roles:
+    - kubernetes
+
+- hosts: srv_servers
+  become: yes
+  become_user: root
+  become_method: su
+  become_exe: 'sudo su -'
+  gather_facts: true
+  user: root
+
+  roles:
+    - srv
+    - role: nginx
+      tags: ng
+    - role: prometeus_alert
+      tags: prom
+    - role: blackbox
+      tags: box
+    - role: grafana
+      tags: graf
