@@ -8,3 +8,4 @@ ansible/roles/prometeus_alert/files/.alert-bot
 .env
 ansible/roles/srv/files/.env
 server01
+edit.txt
