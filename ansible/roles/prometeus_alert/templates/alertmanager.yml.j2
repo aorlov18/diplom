@@ -1,5 +1,5 @@
 global:
-  smtp_from: monitoring@mail.ru
+  smtp_from: alertstat@mail.ru
 
 route:
   group_by: ['alertname', 'instance', 'severity']
@@ -8,19 +8,17 @@ route:
   repeat_interval: 1h
   receiver: 'web.hook'
   routes:
-    - receiver: alert-bot
+    - receiver: send_email
 
 receivers:
-  - name: 'alert-bot'
-    telegram_configs:
-    - send_resolved: true
-      api_url: https://api.telegram.org
-      bot_token: ${BOT_TOKEN}
-      chat_id: ${CHAT_ID}
-      parse_mode: HTML
-      http_config:
-        follow_redirects: true
-        enable_http2: false
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://127.0.0.1:5001/'
+  - name: send_email
+    email_configs:
+    - to: alexorl@internet.ru
+      smarthost: localhost:25
+      require_tls: false
 
 inhibit_rules:
   - source_match:

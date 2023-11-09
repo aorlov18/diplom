@@ -8,5 +8,8 @@
 
 - name: nginx restart
   service:
-    name=nginx
-    state=restarted
+    name: nginx
+    state: restarted
+  when:
+    services_state.ansible_facts.services['nginx.service'].state == 'running'
+  ignore_errors: yes

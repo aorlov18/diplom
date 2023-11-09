@@ -7,5 +7,8 @@ terraform/variable.tf
 ansible/roles/prometeus_alert/files/.alert-bot
 .env
 ansible/roles/srv/files/.env
+!del
 server01
 edit.txt
+my_django/.gitignore
+my_django/config

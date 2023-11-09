@@ -8,10 +8,10 @@ kube_servers:
   hosts:
     server01:
       ansible_host: master.skfact.local
-      ansible_ssh_host: 158.160.105.16
+      ansible_ssh_host: 158.160.110.52
     server02:
       ansible_host: worker01.skfact.local
-      ansible_ssh_host: 51.250.66.43
+      ansible_ssh_host: 158.160.127.18
   
   children:
     master:
@@ -32,4 +32,4 @@ srv_servers:
     server03:
       ansible_host: srv.skfact.local
       virtual_domain: domain.dpl.ru
-      ansible_ssh_host: 158.160.114.174
+      ansible_ssh_host: 158.160.118.151

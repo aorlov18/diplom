@@ -2,18 +2,33 @@
 # tasks file for nginx
 - name: Allow TCP Ports
   iptables:
-  chain: INPUT
-  rule_num: '1'
-  action: insert
-  protocol: tcp
-  jump: ACCEPT
-  destination_port: '{{ item }}'
-    loop: [ '80', '443' ]
+    chain: INPUT
+    rule_num: '1'
+    action: insert
+    protocol: tcp
+    jump: ACCEPT
+    destination_port: '{{ item }}'
+  loop: [ '80', '443' ]
 
-- name: Install Nginx Web Server on Debian Family
+- name: Installing NGINX Dependencies On Debian
   apt:
-    name=nginx
-    state=latest
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  loop:
+    - git
+    - build-essential
+    - libpcre++-dev
+    - zlib1g-dev
+    - libkrb5-dev
+    - libssl-dev
+    - libxslt-dev
+    - libgd-dev
+
+- name: Install Nginx Web Server 
+  apt:
+    name: nginx
+    state: latest
   notify:
     - nginx systemd
 

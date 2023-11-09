@@ -1,0 +1,4 @@
+---
+# tasks file for dashboard
+- name: crete dir dashboard
+

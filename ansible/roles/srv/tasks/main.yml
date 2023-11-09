@@ -182,32 +182,13 @@
     src: ../server01/etc/kubernetes/admin.conf
     dest: /etc/kubernetes/ 
 
+- name: install postfix
+  package:
+    name: postfix
+    state: present
 
-
-
-
-#- name: Install utils for bind
-#  apt:
-#    name: "{{ item }}"
-#    state: present
-#  loop:
- #  - bind9
- #  - dnsutils
- # notify:
- #   - bind systemd
-
-#- prometeus
-#- alertmanager
-#- blackbox
-#- grafana
-
-
-#- name: clean
-#  file:
-#    path: "{{ item }}"
-#    state: absent
-#  loop:
-    #- grafana_{{ grafana_version }}
-#    - '/tmp/alertmanager/'
-#    - '/tmp/prometheus/'
-    #- '/tmp/blackbox_exporter'
+- name: start postfix
+  systemd:
+    name: postfix
+    state: started
+    enabled: yes

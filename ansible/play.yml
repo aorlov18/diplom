@@ -9,6 +9,8 @@
 
   roles:
     - kubernetes
+    - role: node_exporter
+      tags: nodexp
 
 - hosts: srv_servers
   become: yes
@@ -20,11 +22,11 @@
 
   roles:
     - srv
-    - role: nginx
-      tags: ng
     - role: prometeus_alert
       tags: prom
     - role: blackbox
       tags: box
     - role: grafana
       tags: graf
+    - role: nginx
+      tags: nginx

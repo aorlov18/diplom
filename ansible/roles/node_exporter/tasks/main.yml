@@ -1,0 +1,78 @@
+---
+# tasks file for node_exporter
+- name: Open ports on a firewall for Node Exporter
+  iptables:
+    chain: INPUT
+    rule_num: '1'
+    action: insert
+    protocol: tcp
+    jump: ACCEPT
+    destination_port: '9100'
+
+- name: create node exporter user
+  user:
+    name: nodeuser
+    append: true
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+
+- name: create node exporter config dir
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: nodeuser
+    group: nodeuser
+  loop:
+    - '/tmp/node_exporter'
+    - '/etc/node_exporter'
+    
+  
+- name: download and unzip node exporter if not exist
+  unarchive:
+    src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /tmp/node_exporter
+    creates: /tmp/node_exporter/node_exporter-{{ node_exporter_version }}.linux-amd64
+    remote_src: yes
+    validate_certs: no
+
+
+- name: move the binary to the final destination
+  copy:
+    src: /tmp/node_exporter/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter
+    dest: /usr/local/bin
+    owner: nodeuser
+    group: nodeuser
+    mode: 0755
+    remote_src: yes
+#  when: __check_node_exporter_present.stat.exists == false or not __get_node_exporter_version.stdout == node_exporter_version
+
+
+- name: Copy node_exporter.service in the Systemd
+  copy:
+    src: node_exporter.service
+    dest: /etc/systemd/system/
+  notify:
+    - systemd reload
+
+- name: launch the service for node_exporter
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+
+- name: Check if node exporter emits metrices
+  uri:
+    url: http://127.0.0.1:9100/metrics 
+    method: GET
+    status_code: 200
+
+#- name: check if node exporter exist
+#  stat:
+#    path: "{{ node_exporter_bin }}"
+#  register: __check_node_exporter_present
+
+- name: Delete node exporter tmp folder
+  file:
+    path: /tmp/node_exporter
+    state: absent
