@@ -11,7 +11,7 @@
 
 5. по заверешению работы ансибль, заходим на сервер srv под именем user
 
-6. git clone git@gitlab.com:devops5483744/django.git
+6. git clone https://gitlab.com/aorlov18/my_django.git
 docker push alexorl/mydjango:tagname
 https://hub.docker.com/r/alexorl/mydjango
 
@@ -23,7 +23,7 @@ gitlab-runner run
 
 8. В настройках CI/CD Gitlab добавляем две переменные - DOCKER_USERNAME и DOCKER_PASSWORD. Соответственно, логин и пароль для прохождения валидации в репозитории Docker Hub.
 
-9. Для корректной работы kubectl на srv берем содержимое файла /etc/kubernetes/admin.conf с мастера kubernetes и копируем его в такой же файл на srv.
+
 
 
 8.

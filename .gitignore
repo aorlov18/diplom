@@ -12,3 +12,4 @@ server01
 edit.txt
 my_django/.gitignore
 my_django/config
+my_django/kube

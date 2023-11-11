@@ -13,7 +13,7 @@ modules:
         - "Could not connect to database"
       fail_if_body_not_matches_regexp:
         - "Download the latest version here"
-      fail_if_header_matches: # Verifies that no cookies are set
+      fail_if_header_matches: 
         - header: Set-Cookie
           allow_missing: true
           regexp: '.*'

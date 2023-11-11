@@ -8,9 +8,9 @@
   user: root
 
   roles:
-    - kubernetes
-    #- role: node_exporter
-    #  tags: nodexp
+    - role: kubernetes
+      tags: kub
+
 
 - hosts: srv_servers
   become: yes

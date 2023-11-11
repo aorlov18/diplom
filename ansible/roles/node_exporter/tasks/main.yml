@@ -13,7 +13,6 @@
 - name: create node exporter user
   user:
     name: nodeuser
-    #append: true
     shell: /usr/sbin/nologin
     system: true
     create_home: false
@@ -44,7 +43,6 @@
     dest: /usr/local/bin
     remote_src: yes
     mode: preserve
-#    mode: 0755
     owner: nodeuser
     group: nodeuser
     

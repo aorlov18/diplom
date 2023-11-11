@@ -1,5 +1,5 @@
 global:
-  smtp_from: alertstat@mail.ru
+  smtp_from: alexorl@internet.ru
 
 route:
   group_by: ['alertname', 'instance', 'severity']
@@ -16,7 +16,7 @@ receivers:
       - url: 'http://127.0.0.1:5001/'
   - name: send_email
     email_configs:
-    - to: alexorl@internet.ru
+    - to: alexorl@bk.ru
       smarthost: localhost:25
       require_tls: false
 

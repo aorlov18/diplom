@@ -8,10 +8,10 @@ kube_servers:
   hosts:
     server01:
       ansible_host: master.skfact.local
-      ansible_ssh_host: 158.160.37.68
+      ansible_ssh_host: 158.160.116.5
     server02:
       ansible_host: worker01.skfact.local
-      ansible_ssh_host: 84.201.131.23
+      ansible_ssh_host: 158.160.123.179
   
   children:
     master:
@@ -27,11 +27,11 @@ srv_servers:
     ansible_ssh_private_key_file: ../dpl.key
     ansible_user: user
     ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
-    virtual_domain: 158.160.51.92.sslip.io
+    virtual_domain: 158.160.118.237.sslip.io
     
   hosts:
     server03:
       ansible_host: srv.skfact.local
-      ansible_ssh_host: 158.160.51.92
+      ansible_ssh_host: 158.160.118.237
       
       
