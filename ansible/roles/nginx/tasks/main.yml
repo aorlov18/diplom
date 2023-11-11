@@ -32,9 +32,6 @@
   notify:
     - nginx systemd
 
-#- name: create enf файл
-#  debu
-
 
 #- name: Create tmp directory for cert
 #  file:
@@ -64,9 +61,6 @@
 #    dest: /etc/nginx/sites-enabled/{{ virtual_domain }}.conf
 #  notify:
 #    - nginx restart
-
-
-
 
 
 

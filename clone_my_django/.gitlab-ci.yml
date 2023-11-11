@@ -1,0 +1,71 @@
+default:
+  tags:
+    - skillfactory
+
+stages:
+  - build
+  - build-kube
+  - install helm
+
+variables:                                                                                  
+  IMAGE_NAME: my_django                                                                      
+  IMAGE_PUB_NAME: alexorl/mydjango 
+  PROJECT_NAME: django-app
+
+  #TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+  #TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
+                                                                  
+getVersion:
+  stage: .pre
+  script:
+    - VERSION="$(git describe --tags --match v[0-9]*.[0-9]*.[0-9]* --abbrev=0 2>/dev/null|cut -dv -f2)" || true
+    - test -z "${VERSION}" && VERSION=$(cat VERSION)
+    - echo "VERSION=${VERSION}" > variables.env
+  artifacts:
+    reports:
+      dotenv: variables.env
+
+build docker images:
+  image: my_django:latest
+  stage: build-doc
+  #services:
+  #  - docker:dind
+  script:
+    - docker build -f Dockerfile -t ${IMAGE_NAME}:${VERSION}=(cat VERSION) . 
+    - docker login -u "${DOCKER_USER}" -p "{DOCKER_PASSWORD}"
+    - docker tag ${IMAGE_NAME}:${VERSION} ${IMAGE_PUB_NAME}:${VERSION}
+    - docker push ${IMAGE_PUB_NAME}:${VERSION}
+    - sed -s "s/~VERSION~/${VERSION}/g" -i ./kube/Chart.yaml                                
+    - sed -s "s/~gp~/${PROJECT_NAME}/" -i ./kube/values.yaml                      
+  artifacts:                                                                                
+    paths:                                                                                  
+      - ./kube
+
+Create helm release:
+  stage: build-kube
+  script:
+    - tar zcf ./kube-${VERSION}.tar.gz ./kube
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: 'Created using the release-cli'
+    assets:
+      links:
+        - name: "mydjango-helm-${VERSION}"
+          url: "https://gitlab.com/aorlov18/my_django/-/jobs/${CI_JOB}/artifacts/raw/kube-${VERSION}.tar.gz"
+  artifacts:
+    paths:
+      - ./kube-${VERSION}.tar.gz
+  rules:
+    - if: $CI_COMMIT_TAG
+
+    
+Install Helm Application:
+  stage: install-helm
+  script:
+    - ls -l
+    - cat kube/Chart.yaml
+    - helm install ${PROJECT_NAME} kube/ --dry-run && helm install ${PROJECT_NAME} kube/
+
+
+
