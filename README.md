@@ -25,8 +25,3 @@ gitlab-runner run
 
 
 
-
-8.
-
-
-
