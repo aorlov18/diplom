@@ -32,21 +32,47 @@
   notify:
     - nginx systemd
 
-- name: Replace nginx.conf
-  template:
-    src: nginx.conf
-    dest: /etc/nginx/nginx.conf
-  
-- name: Create home directory for www
-  file:
-    path: /var/www/{{ virtual_domain }}
-    state: directory
+#- name: create enf файл
+#  debu
 
-- name: Add virtual domain in NGINX for Deb
-  vars:
-    fastcgi_pass_path: /run/php/php7.2-fpm.sock
-  template:
-    src: nginx_vhosts.conf
-    dest: /etc/nginx/sites-enabled/{{ virtual_domain }}.conf
-  notify:
-    - nginx restart
+
+#- name: Create tmp directory for cert
+#  file:
+#    path: /tmp/cert
+#    state: directory
+
+#- name: self-signed certificate
+#  shell: openssl req -new -x509 -days 1461 -nodes -out /tmp/cert/public.pem -keyout /tmp/cert/private.key -subj "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN={{ virtual_domain_2 }}"
+
+#- name: Replace nginx.conf
+#  template:
+#    src: nginx.conf
+#    dest: /etc/nginx/nginx.conf
+#  notify:
+#    - nginx restart
+  
+#- name: Create home directory for www
+#  file:
+#    path: /var/www/{{ virtual_domain }}
+#    state: directory
+
+#- name: Add virtual domain in NGINX for Deb
+#  vars:
+#    fastcgi_pass_path: /run/php/php7.2-fpm.sock
+#  template:
+#    src: nginx_vhosts.conf
+#    dest: /etc/nginx/sites-enabled/{{ virtual_domain }}.conf
+#  notify:
+#    - nginx restart
+
+
+
+
+
+
+#- name: сreate directories for certificate
+#  file: path=/etc/ssl state=directory
+
+#- name: self-signed certificate
+#  shell: openssl req -new -x509 -days 1461 -nodes -out /etc/ssl/public.pem -keyout /etc/ssl/private.key -subj "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN={{ virtual_domain_2 }}"
+

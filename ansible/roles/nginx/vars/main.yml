@@ -4,3 +4,6 @@ nginx_user: www-data
 worker_processes: auto
 worker_connections: 2048
 client_max_body_size: 512M
+letsencrypt_email: alexorl@internet.ru
+
+

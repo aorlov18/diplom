@@ -9,8 +9,8 @@
 
   roles:
     - kubernetes
-    - role: node_exporter
-      tags: nodexp
+    #- role: node_exporter
+    #  tags: nodexp
 
 - hosts: srv_servers
   become: yes

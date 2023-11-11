@@ -37,11 +37,6 @@
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
 
-#- name: Add Docker Repository
-#  apt_repository:
-#    repo: deb https://download.docker.com/linux/ubuntu focal stable
-#    state: present
-
 - name: Add Docker repository
   apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
@@ -118,12 +113,6 @@
 - name: install helm
   shell: test -f /tmp/linux-amd64/helm && (mv /tmp/linux-amd64/helm /usr/local/bin/ && chmod +x /usr/local/bin/helm) || true
 
-
-#- name: Enable service docker, and enable persistently
-#  service: 
-#   name: docker
-#    enabled: yes
-
 - name: Setting up a system variable for the configuration file kubernetes/admin.conf
   lineinfile:
     path: /etc/environment
@@ -140,7 +129,7 @@
         protocol: tcp
         jump: ACCEPT
         destination_port: "{{ item }}"
-      loop: [ '9090', '9093', '9094', '9100', '9115', '5000', '3000' ]
+      loop: [ '9090', '9093', '9094', '9100', '9115', '5000' ]
 
     - name: Allowing UDP ports using IPTABLES
       iptables:
@@ -151,28 +140,28 @@
         jump: ACCEPT
         destination_port: '9094'
 
-- name: сreate directories for docker repo
-  file: path=$HOME/dockerrepo state=directory
+#- name: сreate directories for docker repo
+#  file: path=$HOME/dockerrepo state=directory
 
-- name: сreate directories for certificate for docker-local-hub
-  file: path=/etc/ssl/docrepo state=directory
+#- name: сreate directories for certificate for docker-local-hub
+#  file: path=/etc/ssl/docrepo state=directory
 
-- name: self-signed certificate
-  shell: openssl req -new -x509 -days 1461 -nodes -out /etc/ssl/docrepo/public.pem -keyout /etc/ssl/docrepo/private.key -subj "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN=srv.skfact.local"
+#- name: self-signed certificate
+#  shell: openssl req -new -x509 -days 1461 -nodes -out /etc/ssl/docrepo/public.pem -keyout /etc/ssl/docrepo/private.key -subj "/C=RU/ST=SPb/L=SPb/O=Global Security/OU=IT Department/CN=srv.skfact.local"
 
-- name: stop and remove docker registry and container
-  shell: docker container stop registry && docker container rm -v registry
-  ignore_errors: yes
+#- name: stop and remove docker registry and container
+#  shell: docker container stop registry && docker container rm -v registry
+#  ignore_errors: yes
 
-- name: run docker container TSL certificate 
-  shell: docker run -d -p 5000:5000 --restart=always --name registry -v /dockerrepo:/var/lib/registry -v /etc/ssl/docrepo:/certs -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/public.pem -e REGISTRY_HTTP_TLS_KEY=/certs/private.key registry:2
-  ignore_errors: yes
+#- name: run docker container TSL certificate 
+#  shell: docker run -d -p 5000:5000 --restart=always --name registry -v /dockerrepo:/var/lib/registry -v /etc/ssl/docrepo:/certs -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/public.pem -e REGISTRY_HTTP_TLS_KEY=/certs/private.key registry:2
+#  ignore_errors: yes
   
-- name: Docker systemctl enable and start
-  systemd:
-    name: docker
-    enabled: yes
-    state: restarted
+#- name: Docker systemctl enable and start
+#  systemd:
+#    name: docker
+#    enabled: yes
+#    state: restarted
 
 - name: сreate directories for set-file kubernetes
   file: path=/etc/kubernetes state=directory
