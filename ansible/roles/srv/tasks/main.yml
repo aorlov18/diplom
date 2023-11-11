@@ -181,3 +181,8 @@
     name: postfix
     state: started
     enabled: yes
+
+- name: shara
+  shell: chmod go-r /etc/kubernetes/admin.conf
+
+
