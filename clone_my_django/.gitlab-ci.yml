@@ -26,10 +26,7 @@ getVersion:
       dotenv: variables.env
 
 build docker images:
-  image: my_django:latest
   stage: build-doc
-  #services:
-  #  - docker:dind
   script:
     - docker build -f Dockerfile -t ${IMAGE_NAME}:${VERSION}=(cat VERSION) . 
     - docker login -u "${DOCKER_USER}" -p "{DOCKER_PASSWORD}"
