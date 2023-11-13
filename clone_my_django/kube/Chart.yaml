@@ -1,0 +1,11 @@
+apiVersion: v2
+name: mydjango-chart
+version: ~VERSION~
+description: Skillfactory diplom
+type: application
+sources:
+  - https://hub.docker.com/repository/docker/alexorl/mydjango
+maintainers:
+  - name: Alex Orlov
+    email: alexorl@bk.ru
+appVersion: ~VERSION~

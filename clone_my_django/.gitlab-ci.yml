@@ -48,7 +48,7 @@ Create helm release:
     description: 'Created using the release-cli'
     assets:
       links:
-        - name: "mydjango-helm-${VERSION}"
+        - name: "mydjango-kube-${VERSION}"
           url: "https://gitlab.com/aorlov18/my_django/-/jobs/${CI_JOB}/artifacts/raw/kube-${VERSION}.tar.gz"
   artifacts:
     paths:
